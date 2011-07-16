@@ -31,6 +31,11 @@ module TimelineFu
             memo
           end
           create_options[:event_type] = event_type.to_s
+          create_options[:changed_fields] = self.changes
+          create_options[:subject_string] = self.generate_timeline_event_summary if self.respond_to?(:generate_activity_log_summary)
+          try_title = self.try(:title) rescue nil
+          try_title ||= self.try(:name) rescue nil
+          create_options[:subject_string] ||= "#{self.class.name.underscore.humanize} ##{self.id}#{" \"#{try_title}\"" unless try_title.blank?}"
 
           TimelineEvent.create!(create_options)
         end
