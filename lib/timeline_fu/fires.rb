@@ -18,7 +18,7 @@ module TimelineFu
 
         method_name = :"fire_#{event_type}_after_#{opts[:on]}"
         define_method(method_name) do
-          create_options = [:actor, :subject, :secondary_subject].inject({}) do |memo, sym|
+          create_options = [:actor, :subject, :secondary_subject, :subject_string].inject({}) do |memo, sym|
             if opts[sym]
               if opts[sym].respond_to?(:call)
                 memo[sym] = opts[sym].call(self)
@@ -32,7 +32,7 @@ module TimelineFu
           end
           create_options[:event_type] = event_type.to_s
           create_options[:changed_fields] = self.changes
-          create_options[:subject_string] = create_options[:subject].generate_timeline_event_summary if create_options[:subject].respond_to?(:generate_activity_log_summary)
+          create_options[:subject_string] ||= create_options[:subject].generate_timeline_event_summary if create_options[:subject].respond_to?(:generate_activity_log_summary)
           try_title = create_options[:subject].try(:title) rescue nil
           try_title ||= create_options[:subject].try(:name) rescue nil
           create_options[:subject_string] ||= "#{create_options[:subject].class.name.underscore.humanize} ##{create_options[:subject].id}#{" \"#{try_title}\"" unless try_title.blank?}"
